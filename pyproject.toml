@@ -1,0 +1,64 @@
+[tool.poetry]
+name = "gmail-archive"
+version = "0.1.0"
+description = "A CLI tool to access Gmail and suggests unread emails that can be archived"
+authors = ["Eduardo Oliveira <me@eduardooliveira.net>"]
+readme = "README.md"
+packages = [{ include = "gmail_archive" }]
+
+[tool.poetry.dependencies]
+python = "^3.9.0"
+google-auth = "^2.28.0"
+google-auth-oauthlib = "^1.2.0"
+google-auth-httplib2 = "^0.2.0"
+google-api-python-client = "^2.120.0"
+rich = "^14.0.0"
+click = "^8.1.7"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+black = "^25.1.0"
+flake8 = "^7.0.0"
+pylint = "^3.1.0"
+pytest-cov = "^6.2.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+gmail-archive = "gmail_archive.main:main"
+
+[tool.black]
+line-length = 79
+extend-exclude = '''
+/(
+  \.venv
+  | \.git
+  | __pycache__
+  | \.pytest_cache
+  | build
+  | dist
+  | \.eggs
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | venv
+  | ENV
+  | env
+)/
+'''
+
+[tool.pylint.messages_control]
+disable = ["broad-exception-caught"]
+
+[tool.pylint.MASTER]
+ignore = [
+  ".venv",
+  ".git",
+  "__pycache__",
+  ".pytest_cache",
+  "build",
+  "dist",
+  "*.egg-info",
+]
