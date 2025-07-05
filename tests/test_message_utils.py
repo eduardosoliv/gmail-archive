@@ -156,6 +156,7 @@ class TestMessageUtils:
         mock_console_class.return_value = mock_console
 
         # pylint: disable=line-too-long
+        # flake8: noqa: E501
         long_message = "This is a very long success message that contains multiple words and should be displayed properly in the panel without any issues or truncation"
         message_utils = MessageUtils()
         message_utils.success(long_message)
