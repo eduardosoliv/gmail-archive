@@ -8,6 +8,7 @@ from typing import List, Dict
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
+from .email_body_utils import EmailBodyUtils
 
 
 class EmailTableFormatter:  # pylint: disable=too-few-public-methods
@@ -133,11 +134,7 @@ class EmailTableFormatter:  # pylint: disable=too-few-public-methods
         if not body:
             return "[dim](No body)[/dim]"
 
-        # Clean up the body text
-        body = body.strip()
-
-        # Remove extra whitespace and newlines
-        body = " ".join(body.split())
+        body = EmailBodyUtils.clean_strip(body)
 
         if len(body) > 200:
             return body[:197] + "..."

@@ -4,7 +4,6 @@ Gmail API client for accessing unread emails.
 
 import os
 import base64
-import re
 from typing import List, Dict, Optional
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -131,14 +130,9 @@ class GmailClient:
                     elif part.get("mimeType") == "text/html":
                         # Fallback to HTML if no plain text
                         if "data" in part["body"]:
-                            html_content = base64.urlsafe_b64decode(
+                            return base64.urlsafe_b64decode(
                                 part["body"]["data"]
                             ).decode("utf-8", errors="ignore")
-                            # Remove HTML tags
-                            text = re.sub(r"<[^>]+>", "", html_content)
-                            # Remove extra whitespace
-                            text = re.sub(r"\s+", " ", text).strip()
-                            return text
             elif payload.get("mimeType") == "text/plain":
                 # Simple text message
                 if "data" in payload["body"]:
@@ -148,14 +142,9 @@ class GmailClient:
             elif payload.get("mimeType") == "text/html":
                 # Simple HTML message
                 if "data" in payload["body"]:
-                    html_content = base64.urlsafe_b64decode(
+                    return base64.urlsafe_b64decode(
                         payload["body"]["data"]
                     ).decode("utf-8", errors="ignore")
-                    # Remove HTML tags
-                    text = re.sub(r"<[^>]+>", "", html_content)
-                    # Remove extra whitespace
-                    text = re.sub(r"\s+", " ", text).strip()
-                    return text
             return ""
 
         if not self.service:
@@ -195,12 +184,11 @@ class GmailClient:
                 )
 
                 headers = msg["payload"]["headers"]
-                body = _extract_body(msg["payload"])
 
                 email_data = {
                     "from": _extract_header(headers, "From"),
                     "subject": _extract_header(headers, "Subject"),
-                    "body": body,
+                    "body": _extract_body(msg["payload"]),
                     "date": _extract_header(headers, "Date"),
                 }
 
