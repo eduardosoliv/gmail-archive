@@ -3,6 +3,8 @@ Gmail API client for accessing unread emails.
 """
 
 import os
+import base64
+import re
 from typing import List, Dict, Optional
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -107,13 +109,53 @@ class GmailClient:
             max_results: Maximum number of emails to retrieve
 
         Returns:
-            List of email dictionaries with 'from', 'subject', 'date' keys
+            List of email dictionaries with 'from', 'subject', 'body', 'date'
         """
 
         def _extract_header(headers: List[Dict], name: str) -> str:
             for header in headers:
                 if header["name"] == name:
                     return header["value"]
+            return ""
+
+        def _extract_body(payload: Dict) -> str:
+            """Extract text body from email payload."""
+            if "parts" in payload:
+                # Multipart message
+                for part in payload["parts"]:
+                    if part.get("mimeType") == "text/plain":
+                        if "data" in part["body"]:
+                            return base64.urlsafe_b64decode(
+                                part["body"]["data"]
+                            ).decode("utf-8", errors="ignore")
+                    elif part.get("mimeType") == "text/html":
+                        # Fallback to HTML if no plain text
+                        if "data" in part["body"]:
+                            html_content = base64.urlsafe_b64decode(
+                                part["body"]["data"]
+                            ).decode("utf-8", errors="ignore")
+                            # Remove HTML tags
+                            text = re.sub(r"<[^>]+>", "", html_content)
+                            # Remove extra whitespace
+                            text = re.sub(r"\s+", " ", text).strip()
+                            return text
+            elif payload.get("mimeType") == "text/plain":
+                # Simple text message
+                if "data" in payload["body"]:
+                    return base64.urlsafe_b64decode(
+                        payload["body"]["data"]
+                    ).decode("utf-8", errors="ignore")
+            elif payload.get("mimeType") == "text/html":
+                # Simple HTML message
+                if "data" in payload["body"]:
+                    html_content = base64.urlsafe_b64decode(
+                        payload["body"]["data"]
+                    ).decode("utf-8", errors="ignore")
+                    # Remove HTML tags
+                    text = re.sub(r"<[^>]+>", "", html_content)
+                    # Remove extra whitespace
+                    text = re.sub(r"\s+", " ", text).strip()
+                    return text
             return ""
 
         if not self.service:
@@ -147,16 +189,18 @@ class GmailClient:
                     .get(
                         userId="me",
                         id=message["id"],
-                        format="metadata",
-                        metadataHeaders=["From", "Subject", "Date"],
+                        format="full",
                     )
                     .execute()
                 )
 
                 headers = msg["payload"]["headers"]
+                body = _extract_body(msg["payload"])
+
                 email_data = {
                     "from": _extract_header(headers, "From"),
                     "subject": _extract_header(headers, "Subject"),
+                    "body": body,
                     "date": _extract_header(headers, "Date"),
                 }
 

@@ -3,6 +3,7 @@ Table formatter for displaying Gmail emails in CLI.
 """
 
 import email.utils
+from datetime import date
 from typing import List, Dict
 from rich.console import Console
 from rich.table import Table
@@ -47,20 +48,21 @@ class EmailTableFormatter:  # pylint: disable=too-few-public-methods
 
         # Add columns
         table.add_column("From", style="cyan", width=30, no_wrap=True)
-        table.add_column("Subject", style="white", width=45, no_wrap=False)
-        table.add_column("Body", style="grey50", width=70, no_wrap=False)
-        table.add_column("Date", style="green", width=18, no_wrap=True)
+        table.add_column("Subject", style="white", width=30, no_wrap=False)
+        table.add_column("Body", style="grey50", width=80, no_wrap=False)
+        table.add_column("Date", style="green", width=11, no_wrap=True)
 
         # Add rows
         for _email in emails:
             from_text = self._format_sender(_email.get("from", ""))
             subject_text = self._format_subject(_email.get("subject", ""))
+            body_text = self._format_body(_email.get("body", ""))
             date_text = self._format_date(_email.get("date", ""))
 
-            table.add_row(from_text, subject_text, "body", date_text)
+            table.add_row(from_text, subject_text, body_text, date_text)
             # Don't add empty row after the last email
             if _email != emails[-1]:
-                table.add_row("", "", "")
+                table.add_row("", "", "", "")
 
         # Display the table
         self.console.print(table)
@@ -118,19 +120,56 @@ class EmailTableFormatter:  # pylint: disable=too-few-public-methods
 
         return subject
 
+    def _format_body(self, body: str) -> str:
+        """
+        Format email body for display.
+
+        Args:
+            body: Raw email body text
+
+        Returns:
+            Formatted body string (first 200 characters)
+        """
+        if not body:
+            return "[dim](No body)[/dim]"
+
+        # Clean up the body text
+        body = body.strip()
+
+        # Remove extra whitespace and newlines
+        body = " ".join(body.split())
+
+        if len(body) > 200:
+            return body[:197] + "..."
+
+        return body
+
     def _format_date(self, date_string: str) -> str:
         """
         Format email date for display.
 
         Args:
-            date_string: Raw date string from email
+            date_string: Raw date string from email in format RFC 2822.
 
         Returns:
             Formatted date string or original string if parsing fails
         """
         try:
             parsed_date = email.utils.parsedate_to_datetime(date_string)
-            return parsed_date.strftime("%Y-%m-%d %H:%M")
+            today = date.today()
+            current_year = today.year
+
+            # If today, show time only (e.g., "1:06 PM" or "7:05 AM")
+            if parsed_date.date() == today:
+                return parsed_date.strftime("%-I:%M %p")
+
+            # If current year, show month and day (e.g., "Mar 7" or "Jul 4")
+            if parsed_date.year == current_year:
+                return parsed_date.strftime("%b %-d")
+
+            # If previous year, show MM/DD/YY (e.g., "10/26/24")
+            return parsed_date.strftime("%m/%d/%y")
+
         except Exception:
             print(f"Error parsing date: {date_string}")
             return date_string

@@ -1,5 +1,6 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-class-docstring,missing-function-docstring
+from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock
 from gmail_archive.email_table_formatter import EmailTableFormatter
 
@@ -46,7 +47,30 @@ class TestEmailTableFormatter:
         assert (
             # pylint: disable=protected-access
             formatter._format_date("Mon, 1 Jan 2024 12:00:00 +0000")
-            == "2024-01-01 12:00"
+            == "01/01/24"
+        )
+
+    def test_format_date_today(self):
+        formatter = EmailTableFormatter()
+        assert (
+            # pylint: disable=protected-access
+            formatter._format_date(
+                datetime.now()
+                .replace(hour=17, minute=6)
+                .strftime("%a, %d %b %Y %H:%M:%S +0000")
+            )
+            == "5:06 PM"
+        )
+
+    def test_format_date_yesterday(self):
+        formatter = EmailTableFormatter()
+        yesterday = datetime.now() - timedelta(days=1)
+        assert (
+            # pylint: disable=protected-access
+            formatter._format_date(
+                yesterday.strftime("%a, %d %b %Y %H:%M:%S +0000")
+            )
+            == yesterday.strftime("%b %-d")
         )
 
     def test_format_date_invalid(self):
