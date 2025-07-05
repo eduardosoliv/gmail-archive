@@ -47,8 +47,9 @@ class EmailTableFormatter:  # pylint: disable=too-few-public-methods
 
         # Add columns
         table.add_column("From", style="cyan", width=30, no_wrap=True)
-        table.add_column("Subject", style="white", width=50, no_wrap=False)
-        table.add_column("Date", style="green", width=20, no_wrap=True)
+        table.add_column("Subject", style="white", width=45, no_wrap=False)
+        table.add_column("Body", style="grey50", width=70, no_wrap=False)
+        table.add_column("Date", style="green", width=18, no_wrap=True)
 
         # Add rows
         for _email in emails:
@@ -56,7 +57,7 @@ class EmailTableFormatter:  # pylint: disable=too-few-public-methods
             subject_text = self._format_subject(_email.get("subject", ""))
             date_text = self._format_date(_email.get("date", ""))
 
-            table.add_row(from_text, subject_text, date_text)
+            table.add_row(from_text, subject_text, "body", date_text)
             # Don't add empty row after the last email
             if _email != emails[-1]:
                 table.add_row("", "", "")
@@ -112,8 +113,8 @@ class EmailTableFormatter:  # pylint: disable=too-few-public-methods
             return "[dim](No subject)[/dim]"
 
         # Truncate long subjects
-        if len(subject) > 85:
-            return subject[:82] + "..."
+        if len(subject) > 80:
+            return subject[:77] + "..."
 
         return subject
 
