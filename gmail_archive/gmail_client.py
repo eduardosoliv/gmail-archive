@@ -118,33 +118,24 @@ class GmailClient:
             return ""
 
         def _extract_body(payload: Dict) -> str:
-            """Extract text body from email payload."""
+            def _decode_base64(data: str) -> str:
+                return base64.urlsafe_b64decode(data).decode(
+                    "utf-8", errors="ignore"
+                )
+
+            types = ["text/plain", "text/html"]
+
             if "parts" in payload:
                 # Multipart message
                 for part in payload["parts"]:
-                    if part.get("mimeType") == "text/plain":
-                        if "data" in part["body"]:
-                            return base64.urlsafe_b64decode(
-                                part["body"]["data"]
-                            ).decode("utf-8", errors="ignore")
-                    elif part.get("mimeType") == "text/html":
-                        # Fallback to HTML if no plain text
-                        if "data" in part["body"]:
-                            return base64.urlsafe_b64decode(
-                                part["body"]["data"]
-                            ).decode("utf-8", errors="ignore")
-            elif payload.get("mimeType") == "text/plain":
-                # Simple text message
-                if "data" in payload["body"]:
-                    return base64.urlsafe_b64decode(
-                        payload["body"]["data"]
-                    ).decode("utf-8", errors="ignore")
-            elif payload.get("mimeType") == "text/html":
-                # Simple HTML message
-                if "data" in payload["body"]:
-                    return base64.urlsafe_b64decode(
-                        payload["body"]["data"]
-                    ).decode("utf-8", errors="ignore")
+                    mime_type = part.get("mimeType")
+                    if mime_type in types and "data" in part["body"]:
+                        return _decode_base64(part["body"]["data"])
+                return ""
+
+            if payload.get("mimeType") in types and "data" in payload["body"]:
+                return _decode_base64(payload["body"]["data"])
+
             return ""
 
         if not self.service:
