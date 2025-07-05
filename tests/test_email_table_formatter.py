@@ -38,7 +38,7 @@ class TestEmailTableFormatter:
         formatter = EmailTableFormatter()
         # pylint: disable=protected-access
         assert formatter._format_subject("Test Subject") == "Test Subject"
-        assert formatter._format_subject("A" * 100) == "A" * 82 + "..."
+        assert formatter._format_subject("A" * 100) == "A" * 77 + "..."
         assert formatter._format_subject("") == "[dim](No subject)[/dim]"
 
     def test_format_date(self):
@@ -182,9 +182,10 @@ class TestEmailTableFormatter:
 
         # Check that table has 3 columns: From, Subject, Date
         column_names = [col.header for col in table_call.columns]
-        assert column_names == ["From", "Subject", "Date"]
+        assert column_names == ["From", "Subject", "Body", "Date"]
 
         # Check column styles
         assert table_call.columns[0].style == "cyan"
         assert table_call.columns[1].style == "white"
-        assert table_call.columns[2].style == "green"
+        assert table_call.columns[2].style == "grey50"
+        assert table_call.columns[3].style == "green"
