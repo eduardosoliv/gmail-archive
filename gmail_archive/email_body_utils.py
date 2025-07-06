@@ -4,9 +4,10 @@ Email body utilities for cleaning and processing email content.
 
 import re
 import unicodedata
-from html2text import html2text
+import html2text
 
 
+# pylint: disable=too-few-public-methods
 class EmailBodyUtils:
     """Utility class for cleaning and processing email body content."""
 
@@ -24,13 +25,16 @@ class EmailBodyUtils:
         if not body:
             return body
 
-        body = html2text(body)
-        body = EmailBodyUtils.strip(body)
+        h = html2text.HTML2Text()
+        h.ignore_links = True
+        h.ignore_images = True
+        body = h.handle(body)
+        body = EmailBodyUtils._strip(body)
 
         return body
 
     @staticmethod
-    def strip(body: str) -> str:
+    def _strip(body: str) -> str:
         """
         Strip whitespace and newlines from email body.
 
