@@ -50,8 +50,8 @@ class EmailTableFormatter:  # pylint: disable=too-few-public-methods
         # Add columns
         table.add_column("From", style="cyan", width=30, no_wrap=True)
         table.add_column("Subject", style="white", width=30, no_wrap=False)
-        table.add_column("Body", style="grey50", width=80, no_wrap=False)
-        table.add_column("Date", style="green", width=11, no_wrap=True)
+        table.add_column("Body", style="grey50", width=85, no_wrap=False)
+        table.add_column("Date", style="green", width=11, no_wrap=False)
 
         # Add rows
         for _email in emails:
@@ -129,15 +129,15 @@ class EmailTableFormatter:  # pylint: disable=too-few-public-methods
             body: Raw email body text
 
         Returns:
-            Formatted body string (first 200 characters)
+            Formatted body string (first 297 characters)
         """
         if not body:
             return "[dim](No body)[/dim]"
 
-        body = EmailBodyUtils.clean_strip(body)
+        body = EmailBodyUtils.to_text(body)
 
-        if len(body) > 200:
-            return body[:197] + "..."
+        if len(body) > 310:
+            return body[:307] + "..."
 
         return body
 
