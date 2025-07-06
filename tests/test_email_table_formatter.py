@@ -206,7 +206,7 @@ class TestEmailTableFormatter:
 
         # Check that table has 3 columns: From, Subject, Date
         column_names = [col.header for col in table_call.columns]
-        assert column_names == ["From", "Subject", "Body", "Date"]
+        assert column_names == ["From", "Subject", "Body", "Date", "Type"]
 
         # Check column styles
         assert table_call.columns[0].style == "cyan"

@@ -52,6 +52,7 @@ class EmailTableFormatter:  # pylint: disable=too-few-public-methods
         table.add_column("Subject", style="white", width=30, no_wrap=False)
         table.add_column("Body", style="grey50", width=85, no_wrap=False)
         table.add_column("Date", style="green", width=11, no_wrap=False)
+        table.add_column("Type", style="magenta", width=22, no_wrap=False)
 
         # Add rows
         for _email in emails:
@@ -59,11 +60,20 @@ class EmailTableFormatter:  # pylint: disable=too-few-public-methods
             subject_text = self._format_subject(_email.get("subject", ""))
             body_text = self._format_body(_email.get("body", ""))
             date_text = self._format_date(_email.get("date", ""))
+            classification_text = _email.get(
+                "classification", "[dim](N/A)[/dim]"
+            )
 
-            table.add_row(from_text, subject_text, body_text, date_text)
+            table.add_row(
+                from_text,
+                subject_text,
+                body_text,
+                date_text,
+                classification_text,
+            )
             # Don't add empty row after the last email
             if _email != emails[-1]:
-                table.add_row("", "", "", "")
+                table.add_row("", "", "", "", "")
 
         # Display the table
         self.console.print(table)

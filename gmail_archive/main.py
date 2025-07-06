@@ -9,6 +9,7 @@ from rich.panel import Panel
 from .gmail_client import GmailClient
 from .email_table_formatter import EmailTableFormatter
 from .message_utils import MessageUtils
+from .email_classifier import EmailClassifier
 
 
 @click.command()
@@ -64,6 +65,9 @@ def main(max_results: int, credentials: str, token: str):
         message_utils.success("Successfully authenticated with Gmail!")
 
         emails = gmail_client.get_unread_emails(max_results)
+        # Classify emails using OpenAI
+        classifier = EmailClassifier()
+        emails = classifier.classify_emails(emails)
         formatter.display_emails(emails, max_results)
     except Exception as e:
         message_utils.error(f"An unexpected error occurred: {str(e)}")
